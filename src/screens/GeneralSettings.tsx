@@ -1,16 +1,15 @@
-import { Box, Button, Divider, Input, Select, Text, useTheme, VStack } from 'native-base';
+import { Box, Button, CheckIcon, Divider, Input, Select, Text, useTheme, VStack } from 'native-base';
 import { useState } from 'react';
-import { Check } from 'phosphor-react-native';
 import * as Device from 'expo-device';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GeneralSettingsType } from '../@types/settings';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 
-const assemblyOptions = [
+const mountOptions = [
   {
     label: 'Sem suporte',
-    value: 'NO_SUPPORT',
+    value: 'NO_MOUNT',
   },
   {
     label: 'Magnético',
@@ -26,7 +25,7 @@ export function GeneralSettings() {
   const { sizes } = useTheme();
   const [deviceBrand, setDeviceBrand] = useState(Device.brand);
   const [deviceModel, setDeviceModel] = useState(Device.modelName);
-  const [deviceMount, setDeviceMount] = useState('');
+  const [deviceMount, setDeviceMount] = useState<GeneralSettingsType['device']['mountType']>('');
   const [vehicleBrand, setVehicleBrand] = useState('');
   const [vehicleKm, setVehicleKm] = useState('');
   const [gpsRate, setGpsRate] = useState('1000');
@@ -90,10 +89,10 @@ export function GeneralSettings() {
           <Input placeholder="Marca" size="lg" defaultValue={deviceBrand} onChangeText={setDeviceBrand} />
           <Input placeholder="Modelo" size="lg" defaultValue={deviceModel} onChangeText={setDeviceModel}/>
           <Select defaultValue={deviceMount} selectedValue={deviceMount} accessibilityLabel="Escolha o tipo de montagem" placeholder="Escolha o tipo de montagem" size="lg" _selectedItem={{
-            bg: 'gray.400',
-            endIcon: <Check size={sizes[6]} />
-          }} onValueChange={itemValue => setDeviceMount(itemValue)}>
-            {assemblyOptions.map((assembly, index) => (
+            bg: 'amber.100',
+            endIcon: <CheckIcon size="6" />
+          }} onValueChange={(itemValue) => setDeviceMount(itemValue as GeneralSettingsType['device']['mountType'])}>
+            {mountOptions.map((assembly, index) => (
               <Select.Item key={index} label={assembly.label} value={assembly.value} />
             ))}
           </Select>

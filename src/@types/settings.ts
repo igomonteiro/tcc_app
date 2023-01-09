@@ -6,14 +6,14 @@ export type GeneralSettingsType = {
   device: {
     brand: string;
     model: string;
-    mountType: string;
+    mountType?: 'MAGNETIC' | 'CLIP' | 'NO_MOUNT' | '';
   },
   vehicle: {
-    brand: string;
-    km: string;
+    brand?: string;
+    km?: string;
   },
   sensor: {
-    gpsRate: string;
-    accelerometerRate: string;
+    gpsRate?: string;
+    accelerometerRate?: string;
   }
 }

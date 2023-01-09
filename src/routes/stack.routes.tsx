@@ -1,7 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTheme } from 'native-base';
+import { Button, Icon, useTheme } from 'native-base';
 import { GeneralSettings } from '../screens/GeneralSettings';
 import { SensorSettings } from '../screens/SensorSettings';
+import { Feather } from '@expo/vector-icons';
 import { TabRoutes } from './tab.routes';
 
 const { Navigator, Screen } = createNativeStackNavigator();
@@ -15,7 +16,7 @@ export function StackRoutes() {
       initialRouteName="home"
       screenOptions={{
         headerShown: true,
-        headerBackTitle: '',
+        headerBackTitle: null,
         headerTitleStyle: {
           color: colors.white,
           fontWeight: 'bold',

@@ -24,7 +24,9 @@ type AccelerometerType = {
 export function Measurement() {
   const [errorMsg, setErrorMsg] = useState(null);
   const [clientLocation, setClientLocation] = useState(null);
-  const [sensorSettings, setSensorSettings] = useState<SensorSettingsType | null>(null);
+  const [sensorSettings, setSensorSettings] = useState<SensorSettingsType | null>({
+    sensors: ['ACCELEROMETER', 'GPS', 'GYRO']
+  });
   const [generalSettings, setGeneralSettings] = useState<GeneralSettingsType | null>(null);
   const [isLoadingSensorSettings, setIsLoadingSensorSettings] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -45,7 +47,8 @@ export function Measurement() {
 
   function _subscribeToAccelerometer() {
     // Hz to milisseconds
-    Accelerometer.setUpdateInterval((1/Number(generalSettings.sensor.accelerometerRate)) * 1000 || 1000);
+    const updateInterval = (1/Number(generalSettings?.sensor.accelerometerRate)) * 1000;
+    Accelerometer.setUpdateInterval(updateInterval || 1000);
     setSubscription(
       Accelerometer.addListener(setAccelerometerData)
     );
@@ -84,7 +87,7 @@ export function Measurement() {
     if (!clientLocation) {
       const location = await Location.watchPositionAsync({
         accuracy: Location.Accuracy.High,
-        timeInterval: Number(generalSettings.sensor.gpsRate) || 5000
+        timeInterval: Number(generalSettings?.sensor.gpsRate) || 5000
       },(newLocation) => {
         const { coords, timestamp } = newLocation;
         const { altitude, latitude, longitude, speed } = coords;

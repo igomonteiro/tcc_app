@@ -24,15 +24,9 @@ export function TabRoutes() {
       tabBarActiveTintColor: colors.amber[500],
       tabBarInactiveTintColor: colors.gray[300],
       tabBarStyle: {
-        position: 'absolute',
-        height: 70,
-        borderTopWidth: 0,
+        height: 77,
         backgroundColor: colors.gray[800],
       },
-      tabBarItemStyle: {
-        position: 'relative',
-        top: Platform.OS === 'android' ? -10 : 0
-      }
     }}>
       <Screen name="measurement" component={Measurement} options={{
         headerTitle: 'Medição',

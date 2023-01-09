@@ -10,18 +10,30 @@ export function Settings() {
       <Button
         size="lg"
         variant="ghost"
-        justifyContent="start"
+        colorScheme="amber"
         onPress={() => navigate('generalSettings')}
+        justifyContent="flex-start"
+        _text={{
+          color: 'gray.900',
+          fontWeight: 'medium',
+          fontSize: 'lg'
+        }}
       >
-        <Text fontSize="xl" fontWeight="medium">Informações gerais</Text>
+        Informações gerais
       </Button>
       <Button
         size="lg"
         variant="ghost"
-        justifyContent="start"
+        colorScheme="amber"
         onPress={() => navigate('sensorSettings')}
+        justifyContent="flex-start"
+        _text={{
+          color: 'gray.900',
+          fontWeight: 'medium',
+          fontSize: 'lg'
+        }}
       >
-        <Text fontSize="xl" fontWeight="medium">Sensores</Text>
+        Sensores
       </Button>
     </VStack>
   );
