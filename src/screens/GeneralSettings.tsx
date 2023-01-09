@@ -1,6 +1,9 @@
 import { Box, Button, Divider, Input, Select, Text, useTheme, VStack } from 'native-base';
 import { useState } from 'react';
 import { Check } from 'phosphor-react-native';
+import * as Device from 'expo-device';
+import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const assemblyOptions = [
   {
@@ -17,21 +20,93 @@ const assemblyOptions = [
   }
 ];
 
+type GeneralInfoType = {
+  device: {
+    brand: string;
+    model: string;
+    mountType: string;
+  },
+  vehicle: {
+    brand: string;
+    km: string;
+  },
+  sensor: {
+    gpsRate: string;
+    accelerometerRate: string;
+  }
+}
+
 export function GeneralSettings() {
   const { sizes } = useTheme();
-  const [selectedAssembly, setSelectedAssembly] = useState('');
+  const [deviceBrand, setDeviceBrand] = useState(Device.brand);
+  const [deviceModel, setDeviceModel] = useState(Device.modelName);
+  const [deviceMount, setDeviceMount] = useState('');
+  const [vehicleBrand, setVehicleBrand] = useState('');
+  const [vehicleKm, setVehicleKm] = useState('');
+  const [gpsRate, setGpsRate] = useState('1000');
+  const [accelerometerRate, setAccelerometerRate] = useState('1');
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSubmit() {
+    const generalInfo: GeneralInfoType = {
+      device: {
+        brand: deviceBrand,
+        model: deviceModel,
+        mountType: deviceMount
+      },
+      sensor: {
+        gpsRate,
+        accelerometerRate
+      },
+      vehicle: {
+        brand: vehicleBrand,
+        km: vehicleKm
+      }
+    };
+
+    try {
+      setIsLoading(true);
+      await AsyncStorage.setItem('generalInfo', JSON.stringify(generalInfo));
+      setIsLoading(false);
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    async function setStorageStates() {
+      try {
+        const generalInfo = await AsyncStorage.getItem('generalInfo');
+        console.log(generalInfo);
+        if (generalInfo !== null) {
+          const generalInfoJson: GeneralInfoType = JSON.parse(generalInfo);
+
+          setDeviceBrand(generalInfoJson.device.brand || Device.brand);
+          setDeviceModel(generalInfoJson.device.model || Device.modelName);
+          setDeviceMount(generalInfoJson.device.mountType || '');
+          setVehicleBrand(generalInfoJson.vehicle.brand);
+          setVehicleKm(generalInfoJson.vehicle.km);
+          setGpsRate(generalInfoJson.sensor.gpsRate || '1000');
+          setAccelerometerRate(generalInfoJson.sensor.accelerometerRate || '1');
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    setStorageStates();
+  }, []);
 
   return (
     <Box padding={4}>
       <Text fontSize="lg" fontWeight="bold">Celular</Text>
       <Divider mb={4}/>
       <VStack space={4}>
-        <Input placeholder="Marca" size="lg"/>
-        <Input placeholder="Modelo" size="lg"/>
-        <Select selectedValue={selectedAssembly} accessibilityLabel="Escolha o tipo de montagem" placeholder="Escolha o tipo de montagem" size="lg" _selectedItem={{
+        <Input placeholder="Marca" size="lg" defaultValue={deviceBrand} onChangeText={setDeviceBrand} />
+        <Input placeholder="Modelo" size="lg" defaultValue={deviceModel} onChangeText={setDeviceModel}/>
+        <Select defaultValue={deviceMount} selectedValue={deviceMount} accessibilityLabel="Escolha o tipo de montagem" placeholder="Escolha o tipo de montagem" size="lg" _selectedItem={{
           bg: 'gray.400',
           endIcon: <Check size={sizes[6]} />
-        }} onValueChange={itemValue => setSelectedAssembly(itemValue)}>
+        }} onValueChange={itemValue => setDeviceMount(itemValue)}>
           {assemblyOptions.map((assembly, index) => (
             <Select.Item key={index} label={assembly.label} value={assembly.value} />
           ))}
@@ -41,18 +116,20 @@ export function GeneralSettings() {
       <Text fontSize="lg" fontWeight="bold" mt={4}>Veículo</Text>
       <Divider mb={4}/>
       <VStack space={4}>
-        <Input placeholder="Marca/modelo" size="lg"/>
-        <Input placeholder="Km" size="lg" keyboardType="numeric"/>
+        <Input placeholder="Marca/modelo" size="lg" defaultValue={vehicleBrand} onChangeText={setVehicleBrand}/>
+        <Input placeholder="Km" size="lg" keyboardType="numeric" defaultValue={vehicleKm} onChangeText={setVehicleKm}/>
       </VStack>
 
       <Text fontSize="lg" fontWeight="bold" mt={4}>GPS/Acelerômetro</Text>
       <Divider mb={4}/>
       <VStack space={4}>
-        <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="numeric"/>
-        <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="numeric"/>
+        <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="numeric" defaultValue={gpsRate} onChangeText={setGpsRate}/>
+        <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="numeric" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
       </VStack>
 
-      <Button colorScheme="amber" mt={4}>Confirmar</Button>
+      <Button isLoading={isLoading} colorScheme="amber" mt={4} onPress={handleSubmit}>
+        Confirmar
+      </Button>
     </Box>
   );
 }
