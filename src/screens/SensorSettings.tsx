@@ -2,28 +2,25 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Box, Button, Checkbox, Divider, Text, VStack } from 'native-base';
 import { useEffect } from 'react';
 import { useState } from 'react';
+import { SensorSettingsType } from '../@types/settings';
 
 const availableSensors = [
   {
     label: 'Acelerômetro',
-    value: 'accelerometer',
+    value: 'ACCELEROMETER',
   },
   {
     label: 'Localização',
-    value: 'gps',
+    value: 'GPS',
   },
   {
     label: 'Giroscópio',
-    value: 'gyro',
+    value: 'GYRO',
   }
 ];
 
-type SensorSettingsType = {
-  sensors: Array<string>
-};
-
 export function SensorSettings() {
-  const [sensors, setSensors] = useState(['accelerometer', 'gps', 'gyro']);
+  const [sensors, setSensors] = useState<SensorSettingsType['sensors']>(['ACCELEROMETER', 'GPS', 'GYRO']);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleOnSubmit() {
@@ -43,7 +40,6 @@ export function SensorSettings() {
     async function setStorageStates() {
       try {
         const sensorInfo = await AsyncStorage.getItem('sensorSettings');
-        console.log(sensorInfo);
         if (sensorInfo !== null) {
           const sensorInfoJson: SensorSettingsType = JSON.parse(sensorInfo);
 

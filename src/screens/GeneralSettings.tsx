@@ -4,6 +4,7 @@ import { Check } from 'phosphor-react-native';
 import * as Device from 'expo-device';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GeneralSettingsType } from '../@types/settings';
 
 const assemblyOptions = [
   {
@@ -20,22 +21,6 @@ const assemblyOptions = [
   }
 ];
 
-type GeneralInfoType = {
-  device: {
-    brand: string;
-    model: string;
-    mountType: string;
-  },
-  vehicle: {
-    brand: string;
-    km: string;
-  },
-  sensor: {
-    gpsRate: string;
-    accelerometerRate: string;
-  }
-}
-
 export function GeneralSettings() {
   const { sizes } = useTheme();
   const [deviceBrand, setDeviceBrand] = useState(Device.brand);
@@ -48,7 +33,7 @@ export function GeneralSettings() {
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit() {
-    const generalInfo: GeneralInfoType = {
+    const generalInfo: GeneralSettingsType = {
       device: {
         brand: deviceBrand,
         model: deviceModel,
@@ -66,7 +51,7 @@ export function GeneralSettings() {
 
     try {
       setIsLoading(true);
-      await AsyncStorage.setItem('generalInfo', JSON.stringify(generalInfo));
+      await AsyncStorage.setItem('generalSettings', JSON.stringify(generalInfo));
       setIsLoading(false);
     } catch(err) {
       console.log(err);
@@ -76,10 +61,10 @@ export function GeneralSettings() {
   useEffect(() => {
     async function setStorageStates() {
       try {
-        const generalInfo = await AsyncStorage.getItem('generalInfo');
+        const generalInfo = await AsyncStorage.getItem('generalSettings');
         console.log(generalInfo);
         if (generalInfo !== null) {
-          const generalInfoJson: GeneralInfoType = JSON.parse(generalInfo);
+          const generalInfoJson: GeneralSettingsType = JSON.parse(generalInfo);
 
           setDeviceBrand(generalInfoJson.device.brand || Device.brand);
           setDeviceModel(generalInfoJson.device.model || Device.modelName);
