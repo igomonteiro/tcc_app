@@ -5,6 +5,7 @@ import * as Device from 'expo-device';
 import { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GeneralSettingsType } from '../@types/settings';
+import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 
 const assemblyOptions = [
   {
@@ -62,7 +63,6 @@ export function GeneralSettings() {
     async function setStorageStates() {
       try {
         const generalInfo = await AsyncStorage.getItem('generalSettings');
-        console.log(generalInfo);
         if (generalInfo !== null) {
           const generalInfoJson: GeneralSettingsType = JSON.parse(generalInfo);
 
@@ -82,39 +82,41 @@ export function GeneralSettings() {
   }, []);
 
   return (
-    <Box padding={4}>
-      <Text fontSize="lg" fontWeight="bold">Celular</Text>
-      <Divider mb={4}/>
-      <VStack space={4}>
-        <Input placeholder="Marca" size="lg" defaultValue={deviceBrand} onChangeText={setDeviceBrand} />
-        <Input placeholder="Modelo" size="lg" defaultValue={deviceModel} onChangeText={setDeviceModel}/>
-        <Select defaultValue={deviceMount} selectedValue={deviceMount} accessibilityLabel="Escolha o tipo de montagem" placeholder="Escolha o tipo de montagem" size="lg" _selectedItem={{
-          bg: 'gray.400',
-          endIcon: <Check size={sizes[6]} />
-        }} onValueChange={itemValue => setDeviceMount(itemValue)}>
-          {assemblyOptions.map((assembly, index) => (
-            <Select.Item key={index} label={assembly.label} value={assembly.value} />
-          ))}
-        </Select>
-      </VStack>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <Box padding={4}>
+        <Text fontSize="lg" fontWeight="bold">Celular</Text>
+        <Divider mb={4}/>
+        <VStack space={4}>
+          <Input placeholder="Marca" size="lg" defaultValue={deviceBrand} onChangeText={setDeviceBrand} />
+          <Input placeholder="Modelo" size="lg" defaultValue={deviceModel} onChangeText={setDeviceModel}/>
+          <Select defaultValue={deviceMount} selectedValue={deviceMount} accessibilityLabel="Escolha o tipo de montagem" placeholder="Escolha o tipo de montagem" size="lg" _selectedItem={{
+            bg: 'gray.400',
+            endIcon: <Check size={sizes[6]} />
+          }} onValueChange={itemValue => setDeviceMount(itemValue)}>
+            {assemblyOptions.map((assembly, index) => (
+              <Select.Item key={index} label={assembly.label} value={assembly.value} />
+            ))}
+          </Select>
+        </VStack>
 
-      <Text fontSize="lg" fontWeight="bold" mt={4}>Veículo</Text>
-      <Divider mb={4}/>
-      <VStack space={4}>
-        <Input placeholder="Marca/modelo" size="lg" defaultValue={vehicleBrand} onChangeText={setVehicleBrand}/>
-        <Input placeholder="Km" size="lg" keyboardType="numeric" defaultValue={vehicleKm} onChangeText={setVehicleKm}/>
-      </VStack>
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Veículo</Text>
+        <Divider mb={4}/>
+        <VStack space={4}>
+          <Input placeholder="Marca/modelo" size="lg" defaultValue={vehicleBrand} onChangeText={setVehicleBrand}/>
+          <Input placeholder="Km" size="lg" keyboardType="number-pad" defaultValue={vehicleKm} onChangeText={setVehicleKm}/>
+        </VStack>
 
-      <Text fontSize="lg" fontWeight="bold" mt={4}>GPS/Acelerômetro</Text>
-      <Divider mb={4}/>
-      <VStack space={4}>
-        <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="numeric" defaultValue={gpsRate} onChangeText={setGpsRate}/>
-        <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="numeric" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
-      </VStack>
+        <Text fontSize="lg" fontWeight="bold" mt={4}>GPS/Acelerômetro</Text>
+        <Divider mb={4}/>
+        <VStack space={4}>
+          <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="number-pad" defaultValue={gpsRate} onChangeText={setGpsRate}/>
+          <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="number-pad" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
+        </VStack>
 
-      <Button isLoading={isLoading} colorScheme="amber" mt={4} onPress={handleSubmit}>
+        <Button isLoading={isLoading} colorScheme="amber" mt={4} onPress={handleSubmit}>
         Confirmar
-      </Button>
-    </Box>
+        </Button>
+      </Box>
+    </TouchableWithoutFeedback>
   );
 }

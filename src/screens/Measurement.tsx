@@ -101,7 +101,9 @@ export function Measurement() {
   }
 
   async function stopLocationTracking() {
-    await clientLocation.remove();
+    if (clientLocation) {
+      await clientLocation.remove();
+    }
   }
 
   useEffect(() => {
@@ -109,7 +111,6 @@ export function Measurement() {
       setIsLoadingSensorSettings(true);
       const sensorSettings = await AsyncStorage.getItem('sensorSettings');
       const generalSettings = await AsyncStorage.getItem('generalSettings');
-      setIsLoadingSensorSettings(false);
       if (sensorSettings) {
         const sensorSettingsJson: SensorSettingsType = JSON.parse(sensorSettings);
         setSensorSettings(sensorSettingsJson);
@@ -119,6 +120,7 @@ export function Measurement() {
         const generalSettingsJson: GeneralSettingsType = JSON.parse(generalSettings);
         setGeneralSettings(generalSettingsJson);
       }
+      setIsLoadingSensorSettings(false);
     }
     loadSensorSettings();
   }, []);
