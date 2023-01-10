@@ -3,10 +3,12 @@ import { ActivityIndicator, StyleSheet } from 'react-native';
 import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Accelerometer } from 'expo-sensors';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GeneralSettingsType, SensorSettingsType } from '../@types/settings';
+import * as FileSystem from 'expo-file-system';
+import dayjs from 'dayjs';
 
 type LocationType = {
   altitude: number;
@@ -40,6 +42,14 @@ export function Measurement() {
   const [subscription, setSubscription] = useState(null);
   const [time, setTime] = useState(0);
 
+  const accelerometerContent = useRef('');
+  const gpsContent = useRef('');
+  const onStartDate = useRef('');
+
+  const accelerometerEnabled = sensorSettings.sensors.indexOf('ACCELEROMETER') > -1;
+  const gpsEnabled = sensorSettings.sensors.indexOf('GPS') > -1;
+  const gyroEnabled = sensorSettings.sensors.indexOf('GYRO') > -1;
+
   const _unsubscribeFromAccelerometer = useCallback(() => {
     subscription && subscription.remove();
     setSubscription(null);
@@ -54,23 +64,34 @@ export function Measurement() {
     );
   }
 
-  function handleOnStartMeasurement() {
+  async function handleOnStartMeasurement() {
     if (isMonitoring) {
-      if (sensorSettings.sensors.indexOf('ACCELEROMETER') > -1) {
+      if (accelerometerEnabled) {
         _unsubscribeFromAccelerometer();
       }
 
-      if (sensorSettings.sensors.indexOf('GPS') > -1) {
+      if (gpsEnabled) {
         stopLocationTracking();
       }
+
+      const accFilename = `${onStartDate.current}-Acc.txt`;
+      const gpsFilename = `${onStartDate.current}-GPS.txt`;
+      const configFilename = `${onStartDate.current}-Config.txt`;
+
+      const dirpath = `${FileSystem.documentDirectory}${onStartDate.current}`;
+      await FileSystem.writeAsStringAsync(dirpath + '/' + accFilename, accelerometerContent.current);
+      await FileSystem.writeAsStringAsync(dirpath + '/' + gpsFilename, gpsContent.current);
     } else {
-      if (sensorSettings.sensors.indexOf('ACCELEROMETER') > -1) {
+      if (accelerometerEnabled) {
         _subscribeToAccelerometer();
       }
 
-      if (sensorSettings.sensors.indexOf('GPS') > -1) {
+      if (gpsEnabled) {
         startLocationTracking();
       }
+      onStartDate.current = dayjs().format('YYYY-MM-DD_HH-mm-ss');
+      const dirpath = `${FileSystem.documentDirectory}${onStartDate.current}`;
+      await FileSystem.makeDirectoryAsync(dirpath, { intermediates: true });
     }
 
     setIsMonitoring((prevState) => !prevState);
@@ -141,6 +162,33 @@ export function Measurement() {
     return () => clearInterval(interval);
   }, [isMonitoring]);
 
+  useEffect(() => {
+    let content;
+    if (isMonitoring) {
+      console.log(accelerometerContent.current);
+      if (!accelerometerContent.current) {
+        // set headers
+        accelerometerContent.current = 'x;y;z;date';
+      } else {
+        content = `\n${accelerometer.x};${accelerometer.y};${accelerometer.z};${dayjs().format('YY-MM-DD HH:mm:ss:sss')}`;
+        accelerometerContent.current += content;
+      }
+    }
+  }, [accelerometer.x, accelerometer.y, accelerometer.z, accelerometerContent, isMonitoring]);
+
+  useEffect(() => {
+    let content;
+    if (isMonitoring) {
+      if (!gpsContent.current) {
+        // set headers
+        gpsContent.current = 'lat;lon;kmh;date';
+      } else {
+        content = `\n${location.latitude};${location.longitude};${speed};${dayjs().format('YY-MM-DD HH:mm:ss:sss')}`;
+        gpsContent.current += content;
+      }
+    }
+  }, [isMonitoring, location?.latitude, location?.longitude, location?.timestamp, speed]);
+
   return (
     <>
       {isLoadingSensorSettings ? (
@@ -204,10 +252,12 @@ export function Measurement() {
             <Button
               leftIcon={<Icon as={FontAwesome} name={!isMonitoring ? 'play' : 'stop'} size="sm" />}
               colorScheme={!isMonitoring ? 'green' : 'red'} size="lg"
-              onPress={handleOnStartMeasurement}>
-              <Text fontWeight="bold" color="white" textTransform="uppercase">
-                {!isMonitoring ? 'Iniciar' : 'Parar'}
-              </Text>
+              onPress={handleOnStartMeasurement}
+              _text={{
+                textTransform: 'uppercase',
+                fontWeight: 'bold',
+              }}>
+              {!isMonitoring ? 'Iniciar' : 'Parar'}
             </Button>
           </VStack>
         )}

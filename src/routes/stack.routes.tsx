@@ -16,7 +16,7 @@ export function StackRoutes() {
       initialRouteName="home"
       screenOptions={{
         headerShown: true,
-        headerBackTitle: null,
+        headerBackTitle: '',
         headerTitleStyle: {
           color: colors.white,
           fontWeight: 'bold',

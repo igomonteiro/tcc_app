@@ -82,7 +82,7 @@ export function GeneralSettings() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <Box padding={4}>
+      <Box flex={1} padding={4}>
         <Text fontSize="lg" fontWeight="bold">Celular</Text>
         <Divider mb={4}/>
         <VStack space={4}>
