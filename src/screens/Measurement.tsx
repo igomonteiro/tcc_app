@@ -106,7 +106,7 @@ export function Measurement() {
 
     if (!clientLocation) {
       const location = await Location.watchPositionAsync({
-        accuracy: Location.Accuracy.High,
+        accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: Number(generalSettings?.sensor.gpsRate) || 5000
       },(newLocation) => {
         const { coords, timestamp } = newLocation;
@@ -208,9 +208,9 @@ export function Measurement() {
             <HStack justifyContent="space-between">
               <Text fontSize="md" fontWeight="medium">Acelerômetro</Text>
               <VStack>
-                <Text fontSize="md">x: { accelerometer.x.toFixed(6)}</Text>
-                <Text fontSize="md">y: { accelerometer.y.toFixed(6) }</Text>
-                <Text fontSize="md">z: { accelerometer.z.toFixed(6) }</Text>
+                <Text fontSize="md">x: { accelerometer.x.toFixed(6)  || '-'} m/s²</Text>
+                <Text fontSize="md">y: { accelerometer.y.toFixed(6)  || '-'} m/s²</Text>
+                <Text fontSize="md">z: { accelerometer.z.toFixed(6)  || '-'} m/s²</Text>
               </VStack>
             </HStack>
             <HStack justifyContent="space-between">

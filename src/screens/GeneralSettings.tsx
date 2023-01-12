@@ -105,12 +105,13 @@ export function GeneralSettings() {
           <Input placeholder="Km" size="lg" keyboardType="number-pad" defaultValue={vehicleKm} onChangeText={setVehicleKm}/>
         </VStack>
 
-        <Text fontSize="lg" fontWeight="bold" mt={4}>GPS/Acelerômetro</Text>
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa GPS</Text>
         <Divider mb={4}/>
-        <VStack space={4}>
-          <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="number-pad" defaultValue={gpsRate} onChangeText={setGpsRate}/>
-          <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="number-pad" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
-        </VStack>
+        <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="number-pad" defaultValue={gpsRate} onChangeText={setGpsRate}/>
+
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa Acelerômetro</Text>
+        <Divider mb={4}/>
+        <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="number-pad" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
 
         <Button isLoading={isLoading} colorScheme="amber" mt={4} onPress={handleSubmit}>
         Confirmar
