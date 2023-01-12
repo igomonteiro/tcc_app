@@ -36,7 +36,7 @@ export function TabRoutes() {
       <Screen name="folders" component={Folders} options={{
         headerTitle: 'Pastas',
         tabBarIcon: ({ color }) => <FolderOpen color={color} size={sizes[6]} />,
-        tabBarLabel: 'Pastas'
+        tabBarLabel: 'Arquivos'
       }}/>
       <Screen name="settings" component={Settings} options={{
         headerTitle: 'Configurações',
