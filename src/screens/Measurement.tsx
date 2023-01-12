@@ -1,6 +1,5 @@
 import { Button, Center, HStack, Icon, Text, VStack } from 'native-base';
-import { ActivityIndicator, StyleSheet } from 'react-native';
-import MapView from 'react-native-maps';
+import { ActivityIndicator } from 'react-native';
 import * as Location from 'expo-location';
 import { Accelerometer } from 'expo-sensors';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -78,7 +77,7 @@ export function Measurement() {
       const gpsFilename = `${onStartDate.current}-GPS.txt`;
       const configFilename = `${onStartDate.current}-Config.txt`;
 
-      const dirpath = `${FileSystem.documentDirectory}${onStartDate.current}`;
+      const dirpath = `${FileSystem.documentDirectory}files/${onStartDate.current}`;
       await FileSystem.writeAsStringAsync(dirpath + '/' + accFilename, accelerometerContent.current);
       await FileSystem.writeAsStringAsync(dirpath + '/' + gpsFilename, gpsContent.current);
     } else {
@@ -90,7 +89,7 @@ export function Measurement() {
         startLocationTracking();
       }
       onStartDate.current = dayjs().format('YYYY-MM-DD_HH-mm-ss');
-      const dirpath = `${FileSystem.documentDirectory}${onStartDate.current}`;
+      const dirpath = `${FileSystem.documentDirectory}files/${onStartDate.current}`;
       await FileSystem.makeDirectoryAsync(dirpath, { intermediates: true });
     }
 
@@ -165,7 +164,6 @@ export function Measurement() {
   useEffect(() => {
     let content;
     if (isMonitoring) {
-      console.log(accelerometerContent.current);
       if (!accelerometerContent.current) {
         // set headers
         accelerometerContent.current = 'x;y;z;date';
@@ -233,21 +231,6 @@ export function Measurement() {
                   </VStack>
                 )}
             </HStack>
-            {!errorMsg && (
-              <MapView
-                initialRegion={{
-                  latitude: location?.latitude ?? 0,
-                  longitude: location?.longitude ?? 0,
-                  latitudeDelta: 0.045,
-                  longitudeDelta: 0.045
-                }}
-                showsUserLocation
-                showsCompass
-                rotateEnabled
-                followsUserLocation
-                style={styles.map}
-              />
-            )}
 
             <Button
               leftIcon={<Icon as={FontAwesome} name={!isMonitoring ? 'play' : 'stop'} size="sm" />}
@@ -264,11 +247,3 @@ export function Measurement() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  map: {
-    width: '100%',
-    height: '45%',
-    borderRadius: 16,
-  },
-});

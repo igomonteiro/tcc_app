@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tcc_app",
-    "slug": "tcc_app",
+    "name": "roadify",
+    "slug": "roadify",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

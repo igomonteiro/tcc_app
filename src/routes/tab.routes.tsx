@@ -1,8 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Platform } from 'react-native';
 import { Measurement } from '../screens/Measurement';
 import { Settings } from '../screens/Settings';
-import { Gear, Activity } from 'phosphor-react-native';
+import { Folders } from '../screens/Folders';
+import { Gear, Activity, FolderOpen } from 'phosphor-react-native';
 import { useTheme } from 'native-base';
 
 const { Navigator, Screen } = createBottomTabNavigator();
@@ -32,6 +32,11 @@ export function TabRoutes() {
         headerTitle: 'Medição',
         tabBarIcon: ({ color }) => <Activity color={color} size={sizes[6]} />,
         tabBarLabel: 'Medição'
+      }}/>
+      <Screen name="folders" component={Folders} options={{
+        headerTitle: 'Pastas',
+        tabBarIcon: ({ color }) => <FolderOpen color={color} size={sizes[6]} />,
+        tabBarLabel: 'Pastas'
       }}/>
       <Screen name="settings" component={Settings} options={{
         headerTitle: 'Configurações',

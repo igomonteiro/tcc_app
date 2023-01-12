@@ -1,4 +1,4 @@
-import { Button, Text, VStack } from 'native-base';
+import { Button, VStack } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 
 export function Settings() {

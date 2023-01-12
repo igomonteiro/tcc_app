@@ -4,6 +4,10 @@ export declare global {
       generalSettings: undefined;
       sensorSettings: undefined;
       home: undefined;
+      folders: undefined;
+      files: {
+        uri: string;
+      }
     }
   }
 }
