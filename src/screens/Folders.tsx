@@ -19,7 +19,13 @@ export function Folders() {
 
   async function setFoldersList() {
     const folders = [];
+    const dirExists = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}files`);
+    if (!dirExists.exists) {
+      return;
+    }
+
     const directories = await FileSystem.readDirectoryAsync(`${FileSystem.documentDirectory}files`);
+
     if (directories) {
       for (const dir of directories) {
         const folderInfo = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}files/${dir}`);
