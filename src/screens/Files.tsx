@@ -78,9 +78,9 @@ export function Files() {
       </Box>} keyExtractor={item => item.uri} />
 
       <Modal presentationStyle='pageSheet' visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <Box p={4}>
+        <ScrollView p={4}>
           <Text>{fileContent}</Text>
-        </Box>
+        </ScrollView>
       </Modal>
     </Box>
   );
