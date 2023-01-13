@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "roadify",
+    "name": "Roadify",
     "slug": "roadify",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -24,10 +24,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.igobrm.roadify"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1179a228-ab57-4d90-b1a3-eebd45c26c43"
+      }
     }
   }
 }
