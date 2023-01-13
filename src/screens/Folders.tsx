@@ -1,10 +1,13 @@
-import { AlertDialog, Box, Button, FlatList, HStack, Text, useTheme, VStack} from 'native-base';
+import { AlertDialog, Box, Button, Divider, FlatList, HStack, Text, useTheme, VStack} from 'native-base';
 import { TouchableOpacity } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { useCallback, useRef, useState } from 'react';
 import { Folder, Trash } from 'phosphor-react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { File } from '../@types/files';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 
 export function Folders() {
   const [folders, setFolders] = useState<File[] | []>([]);
@@ -59,14 +62,15 @@ export function Folders() {
     <Box flex={1} padding={4}>
       <FlatList data={folders} renderItem={({
         item
-      }) => <Box mb={4}>
+      }) => <Box my={2}>
         <TouchableOpacity onPress={() => navigate('files', { uri: item.uri})}>
           <HStack justifyContent="space-between" alignItems="center">
             <HStack alignItems="center" space={2}>
-              <Folder color={colors.amber['600']} size={sizes[10]}></Folder>
+              <Folder color={colors.amber['600']} size={sizes[12]}></Folder>
               <VStack>
                 <Text fontSize="lg">{item.name}</Text>
-                <Text color="gray.400">{item.size/1000} kB</Text>
+                <Text color="gray.400">Criado em {dayjs(item.name, 'YYYY-MM-DD_HH-mm-ss').format('DD/MM/YY [às] HH:mm')}</Text>
+                <Text color="gray.400">Tamanho: {item.size/1000} kB</Text>
               </VStack>
             </HStack>
             <TouchableOpacity onPress={() => handleOnRemove(item)}>
@@ -74,7 +78,7 @@ export function Folders() {
             </TouchableOpacity>
           </HStack>
         </TouchableOpacity>
-      </Box>} keyExtractor={item => item.uri} />
+      </Box>} keyExtractor={item => item.uri} ItemSeparatorComponent={() => (<Divider/>)}/>
 
       <AlertDialog leastDestructiveRef={cancelRef} isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <AlertDialog.Content>

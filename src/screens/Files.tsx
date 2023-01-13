@@ -2,7 +2,7 @@ import { useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
-import { Box, Button, FlatList, HStack, ScrollView, Text, useTheme, VStack} from 'native-base';
+import { Box, Button, Divider, FlatList, HStack, ScrollView, Text, useTheme, VStack} from 'native-base';
 import { File } from '../@types/files';
 import { Export, FileText } from 'phosphor-react-native';
 import { Modal, TouchableOpacity } from 'react-native';
@@ -60,13 +60,13 @@ export function Files() {
     <Box flex={1} padding={4}>
       <FlatList data={files} renderItem={({
         item
-      }) => <Box mb={4}>
+      }) => <Box my={2}>
         <HStack justifyContent="space-between" alignItems="center">
           <TouchableOpacity onPress={() => handleOnFileClick(item)}>
             <HStack alignItems="center" space={2}>
               <FileText color={colors.amber['600']} size={sizes[10]}></FileText>
               <VStack>
-                <Text fontSize="lg">{item.name}</Text>
+                <Text fontSize="lg" numberOfLines={1} maxW={250}>{item.name}</Text>
                 <Text color="gray.400">{item.size/1000} kB</Text>
               </VStack>
             </HStack>
@@ -75,7 +75,7 @@ export function Files() {
             <Export color={colors.gray['600']} size={sizes[8]}></Export>
           </TouchableOpacity>
         </HStack>
-      </Box>} keyExtractor={item => item.uri} />
+      </Box>} keyExtractor={item => item.uri} ItemSeparatorComponent={() => (<Divider/>)}/>
 
       <Modal presentationStyle='pageSheet' visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <ScrollView p={4}>
