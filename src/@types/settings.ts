@@ -15,6 +15,6 @@ export type GeneralSettingsType = {
   sensor: {
     gpsRate?: string;
     accelerometerRate?: string;
-    gyroRate: string;
+    gyroRate?: string;
   }
 }

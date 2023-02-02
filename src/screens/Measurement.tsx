@@ -40,17 +40,17 @@ export function Measurement() {
   const [gyroSubscription, setGyroSubscription] = useState(null);
 
   const accelerometerContent = useRef({
-    header: 'x;y;z;date',
+    header: 'x;y;z;date\n',
     data: [],
   });
 
   const gyroContent = useRef({
-    header: 'x;y;z;date',
+    header: 'x;y;z;date\n',
     data: [],
   });
 
   const gpsContent = useRef({
-    header: 'lat;lon;kmh;date',
+    header: 'lat;lon;kmh;date\n',
     data: [],
   });
 
@@ -60,13 +60,17 @@ export function Measurement() {
   const gpsEnabled = sensorSettings.sensors.includes('GPS');
   const gyroEnabled = sensorSettings.sensors.includes('GYRO');
 
+  const formatDate = () => {
+    return dayjs().format('YY-MM-DD HH:mm:ss:sss');
+  };
+
   function _unsubscribe(subscription, setSubscription) {
     subscription && subscription.remove();
     setSubscription(null);
   }
 
   function getUpdateInterval(sensorType) {
-    return (1 / Number(generalSettings?.sensor[`${sensorType}Rate`])) * 1000 || 1000;
+    return Number(generalSettings?.sensor[`${sensorType}Rate`]) || 1000;
   }
 
   function _subscribe(sensor, setSubscription, setData) {
@@ -105,17 +109,9 @@ export function Measurement() {
       let gyroContentString = gyroContent.current.header;
       let gpsContentString = gpsContent.current.header;
 
-      accelerometerContent.current.data.forEach(el => {
-        accelerometerContentString += `\n${el.x};${el.y};${el.z};${el.date}`;
-      });
-
-      gyroContent.current.data.forEach(el => {
-        gyroContentString += `\n${el.x};${el.y};${el.z};${el.date}`;
-      });
-
-      gpsContent.current.data.forEach(el => {
-        gpsContentString += `\n${el.lat};${el.lon};${el.kmh};${el.date}`;
-      });
+      accelerometerContentString += accelerometerContent.current.data.map(el => `${el.x};${el.y};${el.z};${el.date}`).join('\n');
+      gyroContentString += gyroContent.current.data.map(el => `${el.x};${el.y};${el.z};${el.date}`).join('\n');
+      gpsContentString += gpsContent.current.data.map(el => `${el.lat};${el.lon};${el.kmh};${el.date}`).join('\n');
 
       await FileSystem.writeAsStringAsync(`${dirpath}/${accFilename}`, accelerometerContentString);
       await FileSystem.writeAsStringAsync(`${dirpath}/${gyroFilename}`, gyroContentString);
@@ -243,10 +239,6 @@ export function Measurement() {
       date: formatDate()
     });
   }, [isMonitoring, location, speed]);
-
-  const formatDate = () => {
-    return dayjs().format('YY-MM-DD HH:mm:ss:sss');
-  };
 
   return (
     <>

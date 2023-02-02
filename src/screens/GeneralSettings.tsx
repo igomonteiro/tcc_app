@@ -28,8 +28,8 @@ export function GeneralSettings() {
   const [vehicleBrand, setVehicleBrand] = useState('');
   const [vehicleKm, setVehicleKm] = useState('');
   const [gpsRate, setGpsRate] = useState('5000');
-  const [accelerometerRate, setAccelerometerRate] = useState('1');
-  const [gyroRate, setGyroRate] = useState('1');
+  const [accelerometerRate, setAccelerometerRate] = useState('1000');
+  const [gyroRate, setGyroRate] = useState('1000');
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit() {
@@ -72,8 +72,8 @@ export function GeneralSettings() {
           setVehicleBrand(generalInfoJson.vehicle.brand);
           setVehicleKm(generalInfoJson.vehicle.km);
           setGpsRate(generalInfoJson.sensor.gpsRate || '5000');
-          setAccelerometerRate(generalInfoJson.sensor.accelerometerRate || '1');
-          setGyroRate(generalInfoJson.sensor.gyroRate || '1');
+          setAccelerometerRate(generalInfoJson.sensor.accelerometerRate || '1000');
+          setGyroRate(generalInfoJson.sensor.gyroRate || '1000');
         }
       } catch (err) {
         console.log(err);
@@ -107,17 +107,17 @@ export function GeneralSettings() {
           <Input placeholder="Km" size="lg" keyboardType="number-pad" defaultValue={vehicleKm} onChangeText={setVehicleKm}/>
         </VStack>
 
-        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa GPS</Text>
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa GPS (ms)</Text>
         <Divider mb={2}/>
         <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="number-pad" defaultValue={gpsRate} onChangeText={setGpsRate}/>
 
-        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa acelerômetro</Text>
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa acelerômetro (ms)</Text>
         <Divider mb={2}/>
-        <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="number-pad" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
+        <Input placeholder="Taxa acelerômetro (ms)" size="lg" keyboardType="number-pad" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
 
-        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa giroscópio</Text>
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa giroscópio (ms)</Text>
         <Divider mb={2}/>
-        <Input placeholder="Taxa giroscópio (Hz)" size="lg" keyboardType="number-pad" defaultValue={gyroRate} onChangeText={setGyroRate}/>
+        <Input placeholder="Taxa giroscópio (ms)" size="lg" keyboardType="number-pad" defaultValue={gyroRate} onChangeText={setGyroRate}/>
 
         <Button isLoading={isLoading} colorScheme="amber" mt={4} onPress={handleSubmit}>
           Confirmar
