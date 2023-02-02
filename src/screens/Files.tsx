@@ -2,7 +2,7 @@ import { useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
-import { Box, Button, Divider, FlatList, HStack, ScrollView, Text, useTheme, VStack} from 'native-base';
+import { Box, Divider, FlatList, HStack, ScrollView, Text, useTheme, VStack} from 'native-base';
 import { File } from '../@types/files';
 import { Export, FileText } from 'phosphor-react-native';
 import { Modal, TouchableOpacity } from 'react-native';
@@ -57,11 +57,11 @@ export function Files() {
   }, [selectedFile]);
 
   return (
-    <Box flex={1} padding={4}>
+    <Box flex={1}>
       <FlatList data={files} renderItem={({
         item
       }) => <Box my={2}>
-        <HStack justifyContent="space-between" alignItems="center">
+        <HStack justifyContent="space-between" alignItems="center" px={2}>
           <TouchableOpacity onPress={() => handleOnFileClick(item)}>
             <HStack alignItems="center" space={2}>
               <FileText color={colors.amber['600']} size={sizes[10]}></FileText>

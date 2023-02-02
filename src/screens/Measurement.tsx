@@ -1,20 +1,19 @@
 import { Button, Center, HStack, Icon, Text, VStack } from 'native-base';
 import { ActivityIndicator, Alert } from 'react-native';
-import * as Location from 'expo-location';
 import { Accelerometer, Gyroscope } from 'expo-sensors';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GeneralSettingsType, SensorSettingsType } from '../@types/settings';
-import * as FileSystem from 'expo-file-system';
 import dayjs from 'dayjs';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Location from 'expo-location';
+import * as FileSystem from 'expo-file-system';
 
 type LocationType = {
   altitude: number;
   latitude: number;
   longitude: number;
-  timestamp: number;
 }
 
 type AccelerometerType = {
@@ -26,75 +25,73 @@ type AccelerometerType = {
 export function Measurement() {
   const [errorMsg, setErrorMsg] = useState(null);
   const [clientLocation, setClientLocation] = useState(null);
+  const [location, setLocation] = useState<LocationType | null>(null);
+  const [accelerometerData, setAccelerometerData] = useState<AccelerometerType | null>(null);
+  const [gyroData, setGyroData] = useState<AccelerometerType | null>(null);
+  const [speed, setSpeed] = useState(0);
+  const [time, setTime] = useState(0);
   const [sensorSettings, setSensorSettings] = useState<SensorSettingsType | null>({
     sensors: ['ACCELEROMETER', 'GPS', 'GYRO']
   });
   const [generalSettings, setGeneralSettings] = useState<GeneralSettingsType | null>(null);
   const [isLoadingSensorSettings, setIsLoadingSensorSettings] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const [location, setLocation] = useState<LocationType | null>(null);
-  const [accelerometer, setAccelerometerData] = useState<AccelerometerType>({
-    x: 0,
-    y: 0,
-    z: 0
-  });
-  const [gyro, setGyroData] = useState<AccelerometerType>({
-    x: 0,
-    y: 0,
-    z: 0
-  });
-  const [speed, setSpeed] = useState(0);
   const [accelerometerSubscription, setAccelerometerSubscription] = useState(null);
   const [gyroSubscription, setGyroSubscription] = useState(null);
-  const [time, setTime] = useState(0);
 
-  const accelerometerContent = useRef('');
-  const gpsContent = useRef('');
-  const gyroContent = useRef('');
+  const accelerometerContent = useRef({
+    header: 'x;y;z;date',
+    data: [],
+  });
+
+  const gyroContent = useRef({
+    header: 'x;y;z;date',
+    data: [],
+  });
+
+  const gpsContent = useRef({
+    header: 'lat;lon;kmh;date',
+    data: [],
+  });
+
   const onStartDate = useRef('');
 
-  const accelerometerEnabled = sensorSettings.sensors.indexOf('ACCELEROMETER') > -1;
-  const gpsEnabled = sensorSettings.sensors.indexOf('GPS') > -1;
-  const gyroEnabled = sensorSettings.sensors.indexOf('GYRO') > -1;
+  const accelerometerEnabled = sensorSettings.sensors.includes('ACCELEROMETER');
+  const gpsEnabled = sensorSettings.sensors.includes('GPS');
+  const gyroEnabled = sensorSettings.sensors.includes('GYRO');
 
-  function _unsubscribeFromAccelerometer() {
-    accelerometerSubscription && accelerometerSubscription.remove();
-    setAccelerometerSubscription(null);
+  function _unsubscribe(subscription, setSubscription) {
+    subscription && subscription.remove();
+    setSubscription(null);
   }
 
-  function _unsubscribeFromGyro() {
-    gyroSubscription && gyroSubscription.remove();
-    setGyroSubscription(null);
+  function getUpdateInterval(sensorType) {
+    return (1 / Number(generalSettings?.sensor[`${sensorType}Rate`])) * 1000 || 1000;
   }
 
-  function _subscribeToAccelerometer() {
-    const updateInterval = (1/Number(generalSettings?.sensor.accelerometerRate)) * 1000;
-    Accelerometer.setUpdateInterval(updateInterval || 1000);
-    setAccelerometerSubscription(
-      Accelerometer.addListener(setAccelerometerData)
-    );
-  }
+  function _subscribe(sensor, setSubscription, setData) {
+    let sensorType = 'accelerometer';
 
-  function _subscribeToGyro() {
-    const updateInterval = (1/Number(generalSettings?.sensor.accelerometerRate)) * 1000;
-    Gyroscope.setUpdateInterval(updateInterval || 1000);
-    setGyroSubscription(
-      Gyroscope.addListener(setGyroData)
-    );
+    if (sensor === Gyroscope) {
+      sensorType = 'gyro';
+    }
+
+    sensor.setUpdateInterval(getUpdateInterval(sensorType));
+    setSubscription(sensor.addListener(setData));
   }
 
   async function handleOnStartMeasurement() {
     if (isMonitoring) {
+      if (gpsEnabled) {
+        stopLocationTracking();
+      }
+
       if (accelerometerEnabled) {
-        _unsubscribeFromAccelerometer();
+        _unsubscribe(accelerometerSubscription, setAccelerometerSubscription);
       }
 
       if (gyroEnabled) {
-        _unsubscribeFromGyro();
-      }
-
-      if (gpsEnabled) {
-        stopLocationTracking();
+        _unsubscribe(gyroSubscription, setGyroSubscription);
       }
 
       const accFilename = `${onStartDate.current}-Acc.txt`;
@@ -102,27 +99,45 @@ export function Measurement() {
       const gyroFilename = `${onStartDate.current}-Gyro.txt`;
       const configFilename = `${onStartDate.current}-Config.txt`;
 
-      const dirpath = `${FileSystem.documentDirectory}files/${onStartDate.current}`;
-      await FileSystem.writeAsStringAsync(dirpath + '/' + accFilename, accelerometerContent.current);
-      await FileSystem.writeAsStringAsync(dirpath + '/' + gpsFilename, gpsContent.current);
-      await FileSystem.writeAsStringAsync(dirpath + '/' + gyroFilename, gyroContent.current);
+      const dirpath = `${FileSystem.cacheDirectory}files/${onStartDate.current}`;
+
+      let accelerometerContentString = accelerometerContent.current.header;
+      let gyroContentString = gyroContent.current.header;
+      let gpsContentString = gpsContent.current.header;
+
+      accelerometerContent.current.data.forEach(el => {
+        accelerometerContentString += `\n${el.x};${el.y};${el.z};${el.date}`;
+      });
+
+      gyroContent.current.data.forEach(el => {
+        gyroContentString += `\n${el.x};${el.y};${el.z};${el.date}`;
+      });
+
+      gpsContent.current.data.forEach(el => {
+        gpsContentString += `\n${el.lat};${el.lon};${el.kmh};${el.date}`;
+      });
+
+      await FileSystem.writeAsStringAsync(`${dirpath}/${accFilename}`, accelerometerContentString);
+      await FileSystem.writeAsStringAsync(`${dirpath}/${gyroFilename}`, gyroContentString);
+      await FileSystem.writeAsStringAsync(`${dirpath}/${gpsFilename}`, gpsContentString);
       if (generalSettings) {
-        await FileSystem.writeAsStringAsync(dirpath + '/' + configFilename, JSON.stringify(generalSettings));
+        await FileSystem.writeAsStringAsync(`${dirpath}/${configFilename}`, JSON.stringify(generalSettings));
       }
     } else {
-      if (accelerometerEnabled) {
-        _subscribeToAccelerometer();
-      }
-
-      if (gyroEnabled) {
-        _subscribeToGyro();
-      }
-
       if (gpsEnabled) {
         startLocationTracking();
       }
+
+      if (accelerometerEnabled) {
+        _subscribe(Accelerometer, setAccelerometerSubscription, setAccelerometerData);
+      }
+
+      if (gyroEnabled) {
+        _subscribe(Gyroscope, setGyroSubscription, setGyroData);
+      }
+
       onStartDate.current = dayjs().format('YYYY-MM-DD_HH-mm-ss');
-      const dirpath = `${FileSystem.documentDirectory}files/${onStartDate.current}`;
+      const dirpath = `${FileSystem.cacheDirectory}files/${onStartDate.current}`;
       await FileSystem.makeDirectoryAsync(dirpath, { intermediates: true });
     }
 
@@ -137,27 +152,17 @@ export function Measurement() {
       return;
     }
 
-    const { granted: bgGranted } = await Location.requestBackgroundPermissionsAsync();
-
-    if (!bgGranted) {
-      Alert.alert(
-        'Sem autorização',
-        'Você não autorizou o uso da localização pelo aplicativo, portanto só serão capturados os dados de GPS caso esteja com o aplicativo aberto'
-      );
-    }
-
     if (!clientLocation) {
       const location = await Location.watchPositionAsync({
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: Number(generalSettings?.sensor.gpsRate) || 5000
       },(newLocation) => {
-        const { coords, timestamp } = newLocation;
+        const { coords } = newLocation;
         const { altitude, latitude, longitude, speed } = coords;
         setLocation({
           altitude,
           latitude,
           longitude,
-          timestamp
         });
         setSpeed(speed * 3.6);
       });
@@ -205,44 +210,43 @@ export function Measurement() {
   }, [isMonitoring]);
 
   useEffect(() => {
-    let content;
-    if (isMonitoring) {
-      if (!accelerometerContent.current) {
-        // set headers
-        accelerometerContent.current = 'x;y;z;date';
-      } else {
-        content = `\n${accelerometer.x};${accelerometer.y};${accelerometer.z};${dayjs().format('YY-MM-DD HH:mm:ss:sss')}`;
-        accelerometerContent.current += content;
-      }
+    if (!isMonitoring) return;
+    if (accelerometerData?.x || accelerometerData?.y || accelerometerData?.z) {
+      accelerometerContent.current.data.push({
+        x: accelerometerData.x,
+        y: accelerometerData.y,
+        z: accelerometerData.z,
+        date: formatDate()
+      });
     }
-  }, [accelerometer.x, accelerometer.y, accelerometer.z, accelerometerContent, isMonitoring]);
+  }, [accelerometerData?.x, accelerometerData?.y, accelerometerData?.z, isMonitoring]);
 
   useEffect(() => {
-    let content;
-    if (isMonitoring) {
-      if (!gyroContent.current) {
-        // set headers
-        gyroContent.current = 'x;y;z;date';
-      } else {
-        content = `\n${gyro.x};${gyro.y};${gyro.z};${dayjs().format('YY-MM-DD HH:mm:ss:sss')}`;
-        gyroContent.current += content;
-      }
+    if (!isMonitoring) return;
+    if (gyroData?.x || gyroData?.y || gyroData?.z) {
+      gyroContent.current.data.push({
+        x: gyroData.x,
+        y: gyroData.y,
+        z: gyroData.z,
+        date: formatDate()
+      });
     }
-  }, [gyro.x, gyro.y, gyro.z, gyroContent, isMonitoring]);
+  }, [gyroData?.x, gyroData?.y, gyroData?.z, isMonitoring]);
 
   useEffect(() => {
-    let content;
-    if (isMonitoring) {
-      if (!gpsContent.current) {
-        // set headers
-        gpsContent.current = 'lat;lon;kmh;date';
-      } else {
-        content = `\n${location.latitude};${location.longitude};${speed};${dayjs().format('YY-MM-DD HH:mm:ss:sss')}`;
-        gpsContent.current += content;
-      }
-    }
-  }, [isMonitoring, location?.latitude, location?.longitude, location?.timestamp, speed]);
+    if (!isMonitoring) return;
+    if (!location) return;
+    gpsContent.current.data.push({
+      lat: location.latitude,
+      lon: location.longitude,
+      kmh: speed,
+      date: formatDate()
+    });
+  }, [isMonitoring, location, speed]);
 
+  const formatDate = () => {
+    return dayjs().format('YY-MM-DD HH:mm:ss:sss');
+  };
 
   return (
     <>
@@ -265,17 +269,17 @@ export function Measurement() {
             <HStack justifyContent="space-between">
               <Text fontSize="md" fontWeight="medium">Acelerômetro</Text>
               <VStack>
-                <Text fontSize="md">x: { accelerometer.x.toFixed(6)  || '-'} m/s²</Text>
-                <Text fontSize="md">y: { accelerometer.y.toFixed(6)  || '-'} m/s²</Text>
-                <Text fontSize="md">z: { accelerometer.z.toFixed(6)  || '-'} m/s²</Text>
+                <Text fontSize="md">x: { accelerometerData?.x.toFixed(6)  || '-'} m/s²</Text>
+                <Text fontSize="md">y: { accelerometerData?.y.toFixed(6)  || '-'} m/s²</Text>
+                <Text fontSize="md">z: { accelerometerData?.z.toFixed(6)  || '-'} m/s²</Text>
               </VStack>
             </HStack>
             <HStack justifyContent="space-between">
               <Text fontSize="md" fontWeight="medium">Giroscópio</Text>
               <VStack>
-                <Text fontSize="md">x: { gyro.x.toFixed(6)  || '-'} °/s</Text>
-                <Text fontSize="md">y: { gyro.y.toFixed(6)  || '-'} °/s</Text>
-                <Text fontSize="md">z: { gyro.z.toFixed(6)  || '-'} °/s</Text>
+                <Text fontSize="md">x: { gyroData?.x.toFixed(6)  || '-'} °/s</Text>
+                <Text fontSize="md">y: { gyroData?.y.toFixed(6)  || '-'} °/s</Text>
+                <Text fontSize="md">z: { gyroData?.z.toFixed(6)  || '-'} °/s</Text>
               </VStack>
             </HStack>
             <HStack justifyContent="space-between">

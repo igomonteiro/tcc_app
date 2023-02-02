@@ -1,4 +1,4 @@
-import { Box, Button, CheckIcon, Divider, Input, Select, Text, useTheme, VStack } from 'native-base';
+import { Box, Button, CheckIcon, Divider, Input, Select, Text, VStack } from 'native-base';
 import { useState } from 'react';
 import * as Device from 'expo-device';
 import { useEffect } from 'react';
@@ -22,14 +22,14 @@ const mountOptions = [
 ];
 
 export function GeneralSettings() {
-  const { sizes } = useTheme();
   const [deviceBrand, setDeviceBrand] = useState(Device.brand);
   const [deviceModel, setDeviceModel] = useState(Device.modelName);
   const [deviceMount, setDeviceMount] = useState<GeneralSettingsType['device']['mountType']>('');
   const [vehicleBrand, setVehicleBrand] = useState('');
   const [vehicleKm, setVehicleKm] = useState('');
-  const [gpsRate, setGpsRate] = useState('1000');
+  const [gpsRate, setGpsRate] = useState('5000');
   const [accelerometerRate, setAccelerometerRate] = useState('1');
+  const [gyroRate, setGyroRate] = useState('1');
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit() {
@@ -41,7 +41,8 @@ export function GeneralSettings() {
       },
       sensor: {
         gpsRate,
-        accelerometerRate
+        accelerometerRate,
+        gyroRate,
       },
       vehicle: {
         brand: vehicleBrand,
@@ -70,8 +71,9 @@ export function GeneralSettings() {
           setDeviceMount(generalInfoJson.device.mountType || '');
           setVehicleBrand(generalInfoJson.vehicle.brand);
           setVehicleKm(generalInfoJson.vehicle.km);
-          setGpsRate(generalInfoJson.sensor.gpsRate || '1000');
+          setGpsRate(generalInfoJson.sensor.gpsRate || '5000');
           setAccelerometerRate(generalInfoJson.sensor.accelerometerRate || '1');
+          setGyroRate(generalInfoJson.sensor.gyroRate || '1');
         }
       } catch (err) {
         console.log(err);
@@ -85,7 +87,7 @@ export function GeneralSettings() {
       <Box flex={1} padding={4}>
         <Text fontSize="lg" fontWeight="bold">Celular</Text>
         <Divider mb={4}/>
-        <VStack space={4}>
+        <VStack space={2}>
           <Input placeholder="Marca" size="lg" defaultValue={deviceBrand} onChangeText={setDeviceBrand} />
           <Input placeholder="Modelo" size="lg" defaultValue={deviceModel} onChangeText={setDeviceModel}/>
           <Select defaultValue={deviceMount} selectedValue={deviceMount} accessibilityLabel="Escolha o tipo de montagem" placeholder="Escolha o tipo de montagem" size="lg" _selectedItem={{
@@ -99,22 +101,26 @@ export function GeneralSettings() {
         </VStack>
 
         <Text fontSize="lg" fontWeight="bold" mt={4}>Veículo</Text>
-        <Divider mb={4}/>
-        <VStack space={4}>
+        <Divider mb={2}/>
+        <VStack space={2}>
           <Input placeholder="Marca/modelo" size="lg" defaultValue={vehicleBrand} onChangeText={setVehicleBrand}/>
           <Input placeholder="Km" size="lg" keyboardType="number-pad" defaultValue={vehicleKm} onChangeText={setVehicleKm}/>
         </VStack>
 
         <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa GPS</Text>
-        <Divider mb={4}/>
+        <Divider mb={2}/>
         <Input placeholder="Taxa GPS (ms)" size="lg" keyboardType="number-pad" defaultValue={gpsRate} onChangeText={setGpsRate}/>
 
-        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa Acelerômetro</Text>
-        <Divider mb={4}/>
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa acelerômetro</Text>
+        <Divider mb={2}/>
         <Input placeholder="Taxa acelerômetro (Hz)" size="lg" keyboardType="number-pad" defaultValue={accelerometerRate} onChangeText={setAccelerometerRate}/>
 
+        <Text fontSize="lg" fontWeight="bold" mt={4}>Taxa giroscópio</Text>
+        <Divider mb={2}/>
+        <Input placeholder="Taxa giroscópio (Hz)" size="lg" keyboardType="number-pad" defaultValue={gyroRate} onChangeText={setGyroRate}/>
+
         <Button isLoading={isLoading} colorScheme="amber" mt={4} onPress={handleSubmit}>
-        Confirmar
+          Confirmar
         </Button>
       </Box>
     </TouchableWithoutFeedback>

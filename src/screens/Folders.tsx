@@ -22,16 +22,16 @@ export function Folders() {
 
   async function setFoldersList() {
     const folders = [];
-    const dirExists = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}files`);
+    const dirExists = await FileSystem.getInfoAsync(`${FileSystem.cacheDirectory}files`);
     if (!dirExists.exists) {
       return;
     }
 
-    const directories = await FileSystem.readDirectoryAsync(`${FileSystem.documentDirectory}files`);
+    const directories = await FileSystem.readDirectoryAsync(`${FileSystem.cacheDirectory}files`);
 
     if (directories) {
       for (const dir of directories) {
-        const folderInfo = await FileSystem.getInfoAsync(`${FileSystem.documentDirectory}files/${dir}`);
+        const folderInfo = await FileSystem.getInfoAsync(`${FileSystem.cacheDirectory}files/${dir}`);
         folders.push({
           ...folderInfo,
           name: dir
@@ -59,12 +59,12 @@ export function Folders() {
   }, []));
 
   return (
-    <Box flex={1} padding={4}>
+    <Box flex={1}>
       <FlatList data={folders} renderItem={({
         item
       }) => <Box my={2}>
         <TouchableOpacity onPress={() => navigate('files', { uri: item.uri})}>
-          <HStack justifyContent="space-between" alignItems="center">
+          <HStack justifyContent="space-between" alignItems="center" px={2}>
             <HStack alignItems="center" space={2}>
               <Folder color={colors.amber['600']} size={sizes[12]}></Folder>
               <VStack>

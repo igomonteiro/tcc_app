@@ -32,7 +32,8 @@
     "typescript": "^4.6.3",
     "expo-sharing": "~11.0.1",
     "expo-splash-screen": "~0.17.5",
-    "react": "18.1.0"
+    "react": "18.1.0",
+    "expo-task-manager": "~11.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
