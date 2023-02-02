@@ -1,5 +1,5 @@
 import { Button, Center, HStack, Icon, Text, VStack } from 'native-base';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { Accelerometer, Gyroscope } from 'expo-sensors';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -57,15 +57,15 @@ export function Measurement() {
   const gpsEnabled = sensorSettings.sensors.indexOf('GPS') > -1;
   const gyroEnabled = sensorSettings.sensors.indexOf('GYRO') > -1;
 
-  const _unsubscribeFromAccelerometer = useCallback(() => {
+  function _unsubscribeFromAccelerometer() {
     accelerometerSubscription && accelerometerSubscription.remove();
     setAccelerometerSubscription(null);
-  }, [accelerometerSubscription]);
+  }
 
-  const _unsubscribeFromGyro = useCallback(() => {
+  function _unsubscribeFromGyro() {
     gyroSubscription && gyroSubscription.remove();
     setGyroSubscription(null);
-  }, [gyroSubscription]);
+  }
 
   function _subscribeToAccelerometer() {
     const updateInterval = (1/Number(generalSettings?.sensor.accelerometerRate)) * 1000;
@@ -130,11 +130,20 @@ export function Measurement() {
   }
 
   async function startLocationTracking() {
-    const { status } = await Location.requestForegroundPermissionsAsync();
+    const { granted: fgGranted } = await Location.requestForegroundPermissionsAsync();
 
-    if (status !== 'granted') {
+    if (!fgGranted) {
       setErrorMsg('Sem permissão');
       return;
+    }
+
+    const { granted: bgGranted } = await Location.requestBackgroundPermissionsAsync();
+
+    if (!bgGranted) {
+      Alert.alert(
+        'Sem autorização',
+        'Você não autorizou o uso da localização pelo aplicativo, portanto só serão capturados os dados de GPS caso esteja com o aplicativo aberto'
+      );
     }
 
     if (!clientLocation) {

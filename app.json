@@ -25,7 +25,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.igobrm.roadify"
+      "package": "com.igobrm.roadify",
+      "permissions": [
+        "android.permission.HIGH_SAMPLING_RATE_SENSORS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
